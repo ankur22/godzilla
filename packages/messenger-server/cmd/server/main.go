@@ -1,11 +1,14 @@
 package main
 
-import "log"
+import (
+	"context"
+	"log"
+
+	"github.com/ankur22/godzilla/packages/messenger-server/internal"
+)
 
 func main() {
-	log.Println(returnMessage())
-}
-
-func returnMessage() string {
-	return "Hello World"
+	if err := internal.Run(context.Background()); err != nil {
+		log.Fatalf("Exiting service: %v", err)
+	}
 }
