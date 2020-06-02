@@ -106,6 +106,26 @@ jobs:
           paths:
             - packages/<< parameters.package_name >>
 
+  docker-build-publish:
+    parameters:
+      package_name:
+        type: string
+
+    working_directory: ~/project/packages/<< parameters.package_name >>
+
+    machine: true
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build and push Docker image
+          command: |
+            export TAG=$(cat version.txt)-$CIRCLE_BUILD_NUM
+            export IMAGE_NAME=<< parameters.package_name >>
+            docker build -t ankura22/$IMAGE_NAME:$TAG .
+            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker push ankura22/$IMAGE_NAME:$TAG
+
   deploy:
     parameters:
       package_name:
@@ -117,7 +137,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      # This step is added to show that files are available from the build job. 
       - run:
           name: Content to deploy
           command: ls && cat build.txt
@@ -144,7 +163,7 @@ workflows:
       - checkout:
           name: messenger-server-checkout
           package_name: messenger-server
-      - checkout:
+      - lint:
           name: messenger-server-lint
           package_name: messenger-server
           requires:
@@ -160,11 +179,16 @@ workflows:
           main_path: ./cmd/server
           requires:
             - messenger-server-test
+      - docker-build-publish:
+          name: messenger-server-docker-build-publish
+          package_name: messenger-server
+          requires:
+            - messenger-server-build
       - deploy:
           name: messenger-server-deploy
           package_name: messenger-server
           requires:
-            - messenger-server-build
+            - messenger-server-docker-build-publish
 
   messenger-client-cli:
     when: << pipeline.parameters.messenger-client-cli >>
