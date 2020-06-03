@@ -156,10 +156,8 @@ jobs:
       - attach_workspace:
           at: ~/project
       - gcr/gcr-auth
-        when: << parameters.master >>
       # Install `gcloud` and `kubectl` if not already installed.
       - gcp-gke/install
-        when: << parameters.master >>
       # Update a deployment Docker image.
       - gcp-gke/rollout-image:
           deployment: messenger
@@ -167,7 +165,6 @@ jobs:
           container: messenger-server
           image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
           tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
-          when: << parameters.master >>
 
   deploy:
     parameters:
