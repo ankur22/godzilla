@@ -167,6 +167,12 @@ jobs:
                 container: messenger-server
                 image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
                 tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+      - unless:
+          condition: << parameters.master >>
+          steps:
+            - run:
+              name: Do not deploy non master to k8s engine
+              command: echo "Do not deploy non master to k8s engine"
 
   deploy:
     parameters:
