@@ -138,6 +138,26 @@ jobs:
           image: ankura22/<< parameters.package_name >>
           tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
 
+  Deploy-GCP:
+    description: Deploy application to Google Kubernetes Engine
+    parameters:
+      package_name:
+        type: string
+    working_directory: ~/project/packages/<< parameters.package_name >>
+    machine: true
+    steps:
+      - attach_workspace:
+          at: ~/project
+      # Install `gcloud` and `kubectl` if not already installed.
+      - gcp-gke/install
+      # Initialize the `gcloud` CLI.
+      - gcp-gke/init
+      # Update a deployment Docker image.
+      - gcp-gke/rollout-image:
+          deployment: messenger-cluster
+          container: dominic-backend
+          image: gcr.io/ankura22/<< parameters.package_name >>:$(cat version.txt)-$CIRCLE_BUILD_NUM
+
   deploy:
     parameters:
       package_name:
@@ -197,10 +217,15 @@ workflows:
       #     requires:
       #       - messenger-server-build
       - Build-Push-Image-Docker:
-          name: messenger-server-docker-build-publish
+          name: messenger-server-Build-Push-Image-Docker
           package_name: messenger-server
           requires:
             - messenger-server-build
+      - Deploy-GCP:
+          name: messenger-server-Deploy-GCP
+          package_name: messenger-server
+          requires:
+            - messenger-server-Build-Push-Image-Docker
 
   messenger-client-cli:
     when: << pipeline.parameters.messenger-client-cli >>
