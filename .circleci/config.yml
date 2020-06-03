@@ -130,12 +130,19 @@ jobs:
     steps:
       # - checkout
       - gcr/gcr-auth
-      - gcr/build-image:
-          image: << parameters.package_name >>
-          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM" #Change version number e.g to 'v3' when updating application
-      - gcr/push-image:
-          image: << parameters.package_name >>
-          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM" #Change version number e.g to 'v3' when updating application
+      # - gcr/build-image:
+      #     image: << parameters.package_name >>
+      #     tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM" #Change version number e.g to 'v3' when updating application
+      # - gcr/push-image:
+      #     image: << parameters.package_name >>
+      #     tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM" #Change version number e.g to 'v3' when updating application
+      - run:
+          name: Build and push Docker image
+          command: |
+            export TAG=$(cat version.txt)-$CIRCLE_BUILD_NUM
+            export IMAGE_NAME=<< parameters.package_name >>
+            docker build -t ankura22/$IMAGE_NAME:$TAG .
+            docker push ankura22/$IMAGE_NAME:$TAG
 
   deploy:
     parameters:
