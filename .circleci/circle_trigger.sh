@@ -63,6 +63,9 @@ echo "Searching for changes since commit [${LAST_COMPLETED_BUILD_SHA:0:7}] ..."
 PARAMETERS='"trigger":false'
 COUNT=0
 
+if [[ ${CIRCLE_BRANCH} == "master" ]]
+PARAMETERS+=", \"master\":true"
+
 # Get the list of workflows in current branch for which the CI is currently in failed state
 FAILED_WORKFLOWS=$(cat circle.json \
   | jq -r "map(select(.branch == \"${CIRCLE_BRANCH}\")) \

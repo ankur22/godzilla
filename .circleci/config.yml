@@ -6,6 +6,10 @@ parameters:
     type: boolean
     default: true
 
+  master:
+    type: boolean
+    default: false
+
   # A parameter per package
   messenger-server:
     type: boolean
@@ -143,14 +147,19 @@ jobs:
     parameters:
       package_name:
         type: string
+      master:
+        type: bool
     working_directory: ~/project/packages/<< parameters.package_name >>
     machine: true
+    when: << parameters.master >>
     steps:
       - attach_workspace:
           at: ~/project
       - gcr/gcr-auth
+        when: << parameters.master >>
       # Install `gcloud` and `kubectl` if not already installed.
       - gcp-gke/install
+        when: << parameters.master >>
       # Update a deployment Docker image.
       - gcp-gke/rollout-image:
           deployment: messenger
@@ -158,6 +167,7 @@ jobs:
           container: messenger-server
           image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
           tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+          when: << parameters.master >>
 
   deploy:
     parameters:
@@ -223,8 +233,10 @@ workflows:
       #     requires:
       #       - messenger-server-build
       - Deploy-GCP:
+          when: << pipeline.parameters.master >>
           name: messenger-server-Deploy-GCP
           package_name: messenger-server
+          master: << pipeline.parameters.master >>
           requires:
             - messenger-server-build
             # - messenger-server-Build-Push-Image-Docker
