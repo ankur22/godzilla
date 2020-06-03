@@ -226,7 +226,8 @@ workflows:
           name: messenger-server-Deploy-GCP
           package_name: messenger-server
           requires:
-            - messenger-server-Build-Push-Image-Docker
+            - messenger-server-build
+            # - messenger-server-Build-Push-Image-Docker
 
   messenger-client-cli:
     when: << pipeline.parameters.messenger-client-cli >>
