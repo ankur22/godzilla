@@ -151,7 +151,6 @@ jobs:
         type: bool
     working_directory: ~/project/packages/<< parameters.package_name >>
     machine: true
-    when: << parameters.master >>
     steps:
       - attach_workspace:
           at: ~/project
