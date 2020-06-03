@@ -157,8 +157,7 @@ jobs:
           cluster: messenger-cluster
           container: messenger-server
           image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
-          tag: "$(cat version.txt)-215"
-          # image: gcr.io/ankura22/<< parameters.package_name >>:$(cat version.txt)-$CIRCLE_BUILD_NUM
+          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
 
   deploy:
     parameters:
