@@ -150,7 +150,7 @@ jobs:
           condition: << parameters.master >>
           steps:
             - attach_workspace:
-              at: ~/project
+                at: ~/project
             - gcr/gcr-auth
             - gcr/build-image:
                 image: ankura22/<< parameters.package_name >>
