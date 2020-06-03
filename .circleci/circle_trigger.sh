@@ -63,7 +63,7 @@ echo "Searching for changes since commit [${LAST_COMPLETED_BUILD_SHA:0:7}] ..."
 PARAMETERS='"trigger":false'
 COUNT=0
 
-if [[ ${CIRCLE_BRANCH} == "master" ]]
+if [[ ${CIRCLE_BRANCH} == "master" ]]; then
   PARAMETERS+=", \"master\":true"
 fi
 
