@@ -19,6 +19,10 @@ executors:
     docker:
       - image: circleci/golang:1.14.3
 
+orbs:
+  gcp-gke: circleci/gcp-gke@0.1.0
+  gcr: circleci/gcp-gcr@0.0.2
+
 jobs:
   trigger-workflows:
     executor: node
@@ -32,10 +36,8 @@ jobs:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - checkout:
           path: ~/project
@@ -49,10 +51,8 @@ jobs:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -67,10 +67,8 @@ jobs:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -85,10 +83,8 @@ jobs:
         type: string
       main_path:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -110,9 +106,7 @@ jobs:
     parameters:
       package_name:
         type: string
-
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     machine: true
     steps:
       - attach_workspace:
@@ -126,14 +120,29 @@ jobs:
             echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
             docker push ankura22/$IMAGE_NAME:$TAG
 
+  Build-Push-Image-Docker:
+    description: Build and push image to Google Container Registry
+    parameters:
+      package_name:
+        type: string
+    working_directory: ~/project/packages/<< parameters.package_name >>
+    machine: true
+    steps:
+      # - checkout
+      - gcr/gcr-auth
+      - gcr/build-image:
+          image: << parameters.package_name >>
+          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM" #Change version number e.g to 'v3' when updating application
+      - gcr/push-image:
+          image: << parameters.package_name >>
+          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM" #Change version number e.g to 'v3' when updating application
+
   deploy:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -163,24 +172,26 @@ workflows:
       - checkout:
           name: messenger-server-checkout
           package_name: messenger-server
-      - lint:
-          name: messenger-server-lint
-          package_name: messenger-server
-          requires:
-            - messenger-server-checkout
-      - test:
-          name: messenger-server-test
-          package_name: messenger-server
-          requires:
-            - messenger-server-checkout
+      # - lint:
+      #     name: messenger-server-lint
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-checkout
+      # - test:
+      #     name: messenger-server-test
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-checkout
       - build:
           name: messenger-server-build
           package_name: messenger-server
           main_path: ./cmd/server
           requires:
-            - messenger-server-lint
-            - messenger-server-test
-      - docker-build-publish:
+            # - messenger-server-lint
+            # - messenger-server-test
+            - messenger-server-checkout
+      # - docker-build-publish:
+      - Build-Push-Image-Docker:
           name: messenger-server-docker-build-publish
           package_name: messenger-server
           requires:
