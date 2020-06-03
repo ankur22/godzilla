@@ -155,7 +155,7 @@ jobs:
       - gcp-gke/rollout-image:
           deployment: messenger
           cluster: messenger-cluster
-          container: dominic-backend
+          container: messenger-server
           image: gcr.io/ankura22/<< parameters.package_name >>:$(cat version.txt)-215
           # image: gcr.io/ankura22/<< parameters.package_name >>:$(cat version.txt)-$CIRCLE_BUILD_NUM
 
