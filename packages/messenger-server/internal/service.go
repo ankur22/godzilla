@@ -29,6 +29,7 @@ func Run(ctx context.Context) error {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", helloWorldHandler)
+	r.HandleFunc("/{name}", helloAnyHandler)
 	s := &http.Server{
 		Addr:         ":" + port,
 		Handler:      r,
@@ -48,4 +49,11 @@ func Run(ctx context.Context) error {
 
 func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello world")
+}
+
+func helloAnyHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	fmt.Fprintf(w, "Hello %s", name)
 }
