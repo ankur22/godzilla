@@ -152,18 +152,21 @@ jobs:
     working_directory: ~/project/packages/<< parameters.package_name >>
     machine: true
     steps:
-      - attach_workspace:
-          at: ~/project
-      - gcr/gcr-auth
-      # Install `gcloud` and `kubectl` if not already installed.
-      - gcp-gke/install
-      # Update a deployment Docker image.
-      - gcp-gke/rollout-image:
-          deployment: messenger
-          cluster: messenger-cluster
-          container: messenger-server
-          image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
-          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+      - when:
+          condition: << parameters.master >>
+          steps:
+            - attach_workspace:
+                at: ~/project
+            - gcr/gcr-auth
+            # Install `gcloud` and `kubectl` if not already installed.
+            - gcp-gke/install
+            # Update a deployment Docker image.
+            - gcp-gke/rollout-image:
+                deployment: messenger
+                cluster: messenger-cluster
+                container: messenger-server
+                image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
+                tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
 
   deploy:
     parameters:
@@ -229,7 +232,6 @@ workflows:
       #     requires:
       #       - messenger-server-build
       - Deploy-GCP:
-          when: << pipeline.parameters.master >>
           name: messenger-server-Deploy-GCP
           package_name: messenger-server
           master: << pipeline.parameters.master >>
