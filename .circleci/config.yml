@@ -20,8 +20,8 @@ executors:
       - image: circleci/golang:1.14.3
 
 orbs:
-  gcp-gke: circleci/gcp-gke@0.1.0
-  gcr: circleci/gcp-gcr@0.0.2
+  gcp-gke: circleci/gcp-gke@1.0.4
+  gcr: circleci/gcp-gcr@0.7.1
 
 jobs:
   trigger-workflows:
