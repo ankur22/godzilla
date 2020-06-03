@@ -142,10 +142,10 @@ jobs:
             - gcr/gcr-auth
             - gcr/build-image:
                 image: ankura22/<< parameters.package_name >>
-                tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+                tag: "latest"
             - gcr/push-image:
                 image: ankura22/<< parameters.package_name >>
-                tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+                tag: "latest"
       - unless:
           condition: << parameters.master >>
           steps:
@@ -154,10 +154,10 @@ jobs:
             - gcr/gcr-auth
             - gcr/build-image:
                 image: ankura22/<< parameters.package_name >>
-                tag: "latest"
+                tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
             - gcr/push-image:
                 image: ankura22/<< parameters.package_name >>
-                tag: "latest"
+                tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
 
   Deploy-GCP:
     description: Deploy application to Google Kubernetes Engine
