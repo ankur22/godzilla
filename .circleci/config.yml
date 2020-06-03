@@ -19,6 +19,10 @@ executors:
     docker:
       - image: circleci/golang:1.14.3
 
+orbs:
+  gcp-gke: circleci/gcp-gke@1.0.4
+  gcr: circleci/gcp-gcr@0.7.1
+
 jobs:
   trigger-workflows:
     executor: node
@@ -32,10 +36,8 @@ jobs:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - checkout:
           path: ~/project
@@ -49,10 +51,8 @@ jobs:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -67,10 +67,8 @@ jobs:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -85,10 +83,8 @@ jobs:
         type: string
       main_path:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -110,9 +106,7 @@ jobs:
     parameters:
       package_name:
         type: string
-
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     machine: true
     steps:
       - attach_workspace:
@@ -126,14 +120,51 @@ jobs:
             echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
             docker push ankura22/$IMAGE_NAME:$TAG
 
+  Build-Push-Image-Docker:
+    description: Build and push image to Google Container Registry
+    parameters:
+      package_name:
+        type: string
+    working_directory: ~/project/packages/<< parameters.package_name >>
+    machine: true
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - gcr/gcr-auth
+      - gcr/build-image:
+          image: ankura22/<< parameters.package_name >>
+          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+      - gcr/push-image:
+          image: ankura22/<< parameters.package_name >>
+          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+
+  Deploy-GCP:
+    description: Deploy application to Google Kubernetes Engine
+    parameters:
+      package_name:
+        type: string
+    working_directory: ~/project/packages/<< parameters.package_name >>
+    machine: true
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - gcr/gcr-auth
+      # Install `gcloud` and `kubectl` if not already installed.
+      - gcp-gke/install
+      # Update a deployment Docker image.
+      - gcp-gke/rollout-image:
+          deployment: messenger
+          cluster: messenger-cluster
+          container: messenger-server
+          image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
+          tag: "$(cat version.txt)-$CIRCLE_BUILD_NUM"
+
   deploy:
     parameters:
       package_name:
         type: string
-
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
-
     steps:
       - attach_workspace:
           at: ~/project
@@ -163,33 +194,40 @@ workflows:
       - checkout:
           name: messenger-server-checkout
           package_name: messenger-server
-      - lint:
-          name: messenger-server-lint
-          package_name: messenger-server
-          requires:
-            - messenger-server-checkout
-      - test:
-          name: messenger-server-test
-          package_name: messenger-server
-          requires:
-            - messenger-server-checkout
+      # - lint:
+      #     name: messenger-server-lint
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-checkout
+      # - test:
+      #     name: messenger-server-test
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-checkout
       - build:
           name: messenger-server-build
           package_name: messenger-server
           main_path: ./cmd/server
           requires:
-            - messenger-server-lint
-            - messenger-server-test
-      - docker-build-publish:
-          name: messenger-server-docker-build-publish
+            # - messenger-server-lint
+            # - messenger-server-test
+            - messenger-server-checkout
+      # - docker-build-publish:
+      #     name: messenger-server-docker-build-publish
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-build
+      # - Build-Push-Image-Docker:
+      #     name: messenger-server-Build-Push-Image-Docker
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-build
+      - Deploy-GCP:
+          name: messenger-server-Deploy-GCP
           package_name: messenger-server
           requires:
             - messenger-server-build
-      - deploy:
-          name: messenger-server-deploy
-          package_name: messenger-server
-          requires:
-            - messenger-server-docker-build-publish
+            # - messenger-server-Build-Push-Image-Docker
 
   messenger-client-cli:
     when: << pipeline.parameters.messenger-client-cli >>
