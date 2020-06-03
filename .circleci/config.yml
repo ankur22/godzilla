@@ -171,8 +171,8 @@ jobs:
           condition: << parameters.master >>
           steps:
             - run:
-              name: Do not deploy non master to k8s engine
-              command: echo "Do not deploy non master to k8s engine"
+                name: Do not deploy non master to k8s engine
+                command: echo "Do not deploy non master to k8s engine"
 
   deploy:
     parameters:
