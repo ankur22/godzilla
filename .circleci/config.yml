@@ -110,19 +110,35 @@ jobs:
     parameters:
       package_name:
         type: string
+      master:
+        type: boolean
     working_directory: ~/project/packages/<< parameters.package_name >>
     machine: true
     steps:
       - attach_workspace:
           at: ~/project
-      - run:
-          name: Build and push Docker image
-          command: |
-            export TAG=$(cat version.txt)-$CIRCLE_BUILD_NUM
-            export IMAGE_NAME=<< parameters.package_name >>
-            docker build -t ankura22/$IMAGE_NAME:$TAG .
-            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-            docker push ankura22/$IMAGE_NAME:$TAG
+      - when:
+          condition: << parameters.master >>
+          steps:
+            - run:
+                name: Build and push Docker image
+                command: |
+                  export TAG=$(cat version.txt)-$CIRCLE_BUILD_NUM
+                  export IMAGE_NAME=<< parameters.package_name >>
+                  docker build -t ankura22/$IMAGE_NAME:$TAG .
+                  echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+                  docker push ankura22/$IMAGE_NAME:$TAG
+      - unless:
+          condition: << parameters.master >>
+          steps:
+            - run:
+              name: Build and push Docker image
+              command: |
+                export TAG=latest
+                export IMAGE_NAME=<< parameters.package_name >>
+                docker build -t ankura22/$IMAGE_NAME:$TAG .
+                echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+                docker push ankura22/$IMAGE_NAME:$TAG
 
   Build-Push-Image-Docker:
     description: Build and push image to Google Container Registry
@@ -191,22 +207,6 @@ jobs:
                 name: Do not deploy non master to k8s engine
                 command: echo "Do not deploy non master to k8s engine"
 
-  deploy:
-    parameters:
-      package_name:
-        type: string
-    executor: node
-    working_directory: ~/project/packages/<< parameters.package_name >>
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - run:
-          name: Content to deploy
-          command: ls && cat build.txt
-      - deploy:
-          name: Deploy
-          command: echo "Deploying << parameters.package_name >> ..."
-
 workflows:
   version: 2
 
@@ -226,26 +226,28 @@ workflows:
       - checkout:
           name: messenger-server-checkout
           package_name: messenger-server
-      - lint:
-          name: messenger-server-lint
-          package_name: messenger-server
-          requires:
-            - messenger-server-checkout
-      - test:
-          name: messenger-server-test
-          package_name: messenger-server
-          requires:
-            - messenger-server-checkout
+      # - lint:
+      #     name: messenger-server-lint
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-checkout
+      # - test:
+      #     name: messenger-server-test
+      #     package_name: messenger-server
+      #     requires:
+      #       - messenger-server-checkout
       - build:
           name: messenger-server-build
           package_name: messenger-server
           main_path: ./cmd/server
           requires:
-            - messenger-server-lint
-            - messenger-server-test
+            # - messenger-server-lint
+            # - messenger-server-test
+            - messenger-server-checkout
       # - docker-build-publish:
       #     name: messenger-server-docker-build-publish
       #     package_name: messenger-server
+      #     master: << pipeline.parameters.master >>
       #     requires:
       #       - messenger-server-build
       - Build-Push-Image-Docker:
@@ -257,7 +259,8 @@ workflows:
       - Deploy-GCP:
           name: messenger-server-Deploy-GCP
           package_name: messenger-server
-          master: << pipeline.parameters.master >>
+          # TODO: Change true to << pipeline.parameters.master >>
+          master: true
           requires:
             - messenger-server-Build-Push-Image-Docker
 
@@ -284,8 +287,3 @@ workflows:
           requires:
             - messenger-client-cli-lint
             - messenger-client-cli-test
-      - deploy:
-          name: messenger-client-cli-deploy
-          package_name: messenger-client-cli
-          requires:
-            - messenger-client-cli-build
