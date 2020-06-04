@@ -51,6 +51,23 @@ jobs:
           paths:
             - packages/<< parameters.package_name >>
 
+  coverage:
+    parameters:
+      package_name:
+        type: string
+    executor: node
+    working_directory: ~/project/packages/<< parameters.package_name >>
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          command: |
+            go test -coverprofile=c.out
+            go tool cover -html=c.out -o coverage.html
+            mv coverage.html /tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts
+
   lint:
     parameters:
       package_name:
@@ -92,12 +109,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      # This step is added to show that files are available from the build job. 
       - run:
-          name: Content 
+          name: "Create a temp directory for artifacts"
           command: |
-            cat README.md 
-            echo "<< parameters.package_name >> built." > build.txt
+            mkdir -p /tmp/artifacts
       - run:
           name: Build
           command: echo "Build << parameters.package_name >> ..." && CGO_ENABLED=0 go build -o ./app << parameters.main_path >>
@@ -231,6 +246,11 @@ workflows:
           package_name: messenger-server
           requires:
             - messenger-server-checkout
+      - coverage:
+          name: messenger-server-coverage
+          package_name: messenger-server
+          requires:
+            - messenger-server-checkout
       - test:
           name: messenger-server-test
           package_name: messenger-server
@@ -243,6 +263,7 @@ workflows:
           requires:
             - messenger-server-lint
             - messenger-server-test
+            - messenger-server-coverage
       - docker-build-publish:
           name: messenger-server-docker-build-publish
           package_name: messenger-server
@@ -273,6 +294,11 @@ workflows:
           package_name: messenger-client-cli
           requires:
             - messenger-client-cli-checkout
+      - coverage:
+          name: messenger-client-cli-coverage
+          package_name: messenger-cli-client
+          requires:
+            - messenger-client-cli-checkout
       - test:
           name: messenger-client-cli-test
           package_name: messenger-client-cli
@@ -285,3 +311,4 @@ workflows:
           requires:
             - messenger-client-cli-lint
             - messenger-client-cli-test
+            - messenger-client-cli-coverage
