@@ -195,9 +195,9 @@ jobs:
             - gcp-gke/install
             # Update a deployment Docker image.
             - gcp-gke/rollout-image:
-                deployment: messenger
-                cluster: messenger-cluster
-                container: messenger-server
+                deployment: $DEPLOYMENT
+                cluster: $CLUSTER
+                container: $CONTAINER
                 image: gcr.io/messenger-server-279013/ankura22/<< parameters.package_name >>
                 tag: "latest"
       - unless:
