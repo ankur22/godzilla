@@ -226,30 +226,29 @@ workflows:
       - checkout:
           name: messenger-server-checkout
           package_name: messenger-server
-      # - lint:
-      #     name: messenger-server-lint
-      #     package_name: messenger-server
-      #     requires:
-      #       - messenger-server-checkout
-      # - test:
-      #     name: messenger-server-test
-      #     package_name: messenger-server
-      #     requires:
-      #       - messenger-server-checkout
+      - lint:
+          name: messenger-server-lint
+          package_name: messenger-server
+          requires:
+            - messenger-server-checkout
+      - test:
+          name: messenger-server-test
+          package_name: messenger-server
+          requires:
+            - messenger-server-checkout
       - build:
           name: messenger-server-build
           package_name: messenger-server
           main_path: ./cmd/server
           requires:
-            # - messenger-server-lint
-            # - messenger-server-test
-            - messenger-server-checkout
-      # - docker-build-publish:
-      #     name: messenger-server-docker-build-publish
-      #     package_name: messenger-server
-      #     master: << pipeline.parameters.master >>
-      #     requires:
-      #       - messenger-server-build
+            - messenger-server-lint
+            - messenger-server-test
+      - docker-build-publish:
+          name: messenger-server-docker-build-publish
+          package_name: messenger-server
+          master: << pipeline.parameters.master >>
+          requires:
+            - messenger-server-build
       - Build-Push-Image-Docker:
           name: messenger-server-Build-Push-Image-Docker
           package_name: messenger-server
@@ -259,8 +258,7 @@ workflows:
       - Deploy-GCP:
           name: messenger-server-Deploy-GCP
           package_name: messenger-server
-          # TODO: Change true to << pipeline.parameters.master >>
-          master: true
+          master: << pipeline.parameters.master >>
           requires:
             - messenger-server-Build-Push-Image-Docker
 
