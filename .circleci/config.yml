@@ -70,9 +70,10 @@ jobs:
       - run:
           command: |
             ls
+            ls ../
             go test ./... -coverprofile=<< parameters.package_name >>-c.out
             go tool cover -html=<< parameters.package_name >>-c.out -o << parameters.package_name >>-coverage.html
-            mv coverage.html /tmp/artifacts
+            mv parameters.package_name >>-coverage.html /tmp/artifacts
       - run:
           command: |
             echo "Move codecov file for upload to codecov"
@@ -275,7 +276,6 @@ workflows:
           requires:
             - messenger-server-lint
             - messenger-server-test
-            - messenger-server-coverage
       - docker-build-publish:
           name: messenger-server-docker-build-publish
           package_name: messenger-server
@@ -324,4 +324,3 @@ workflows:
           requires:
             - messenger-client-cli-lint
             - messenger-client-cli-test
-            - messenger-client-cli-coverage
