@@ -26,6 +26,7 @@ executors:
 orbs:
   gcp-gke: circleci/gcp-gke@1.0.4
   gcr: circleci/gcp-gcr@0.7.1
+  codecov: codecov/codecov@1.0.5  
 
 jobs:
   trigger-workflows:
@@ -62,9 +63,13 @@ jobs:
           at: ~/project
       - run:
           command: |
-            go test -coverprofile=c.out
+            go test ./... -coverprofile=c.out
             go tool cover -html=c.out -o coverage.html
             mv coverage.html /tmp/artifacts
+      - codecov/upload:
+          conf: ../../.codecov.yml
+          file: c.out
+          flags: << parameters.package_name >>
       - store_artifacts:
           path: /tmp/artifacts
 
