@@ -74,6 +74,8 @@ jobs:
             mv coverage.html /tmp/artifacts
       - run:
           command: |
+            ls
+            pwd
             echo "Move codecov file for upload to codecov"
             cp ../.codecov.yml .
       - codecov/upload:
