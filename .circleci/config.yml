@@ -73,7 +73,8 @@ jobs:
           at: ~/project
       - run:
           command: |
-            go test ./... 
+            pwd
+            ls
             go test ./... -coverprofile=<< parameters.package_name >>-c.out
             go tool cover -html=<< parameters.package_name >>-c.out -o << parameters.package_name >>-coverage.html
             mv << parameters.package_name >>-coverage.html /tmp/artifacts
