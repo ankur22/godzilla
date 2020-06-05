@@ -42,7 +42,7 @@ jobs:
       package_name:
         type: string
     executor: node
-    working_directory: ~/project
+    working_directory: ~/project/packages/<< parameters.package_name >>
     steps:
       - checkout:
           path: ~/project
@@ -50,11 +50,15 @@ jobs:
           name: "Create a temp directory for artifacts"
           command: |
             mkdir -p /tmp/artifacts
+      - run:
+          command: |
+            echo "Move codecov file for upload to codecov"
+            cp ../../.codecov.yml .
       # This step is added only to show that we are in the package directory
       - persist_to_workspace:
           root: ~/project
           paths:
-            - .
+            - packages/<< parameters.package_name >>
 
   coverage:
     parameters:
@@ -69,17 +73,11 @@ jobs:
           at: ~/project
       - run:
           command: |
-            ls
-            ls ../
             go test ./... -coverprofile=<< parameters.package_name >>-c.out
             go tool cover -html=<< parameters.package_name >>-c.out -o << parameters.package_name >>-coverage.html
             mv parameters.package_name >>-coverage.html /tmp/artifacts
-      - run:
-          command: |
-            echo "Move codecov file for upload to codecov"
-            cp ../../.codecov.yml .
       - codecov/upload:
-          file: c.out
+          file: << parameters.package_name >>-c.out
           flags: << parameters.flag >>
       - store_artifacts:
           path: /tmp/artifacts

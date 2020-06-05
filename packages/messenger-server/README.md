@@ -1,4 +1,4 @@
-# Messenger-Server 
+# Messenger-Server
 
 ## REST Call
 Type: GET  
