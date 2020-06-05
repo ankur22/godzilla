@@ -25,8 +25,8 @@ flags:
     messengerclientcli:
         paths:
             - packages/messenger-client-cli/
-        carryforward: false
+        carryforward: true
     messengerserver:
         paths:
             - packages/messenger-server/
-        carryforward: false
+        carryforward: true
