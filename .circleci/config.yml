@@ -42,7 +42,7 @@ jobs:
       package_name:
         type: string
     executor: node
-    working_directory: ~/project/packages/<< parameters.package_name >>
+    working_directory: ~/project
     steps:
       - checkout:
           path: ~/project
@@ -55,7 +55,7 @@ jobs:
       - persist_to_workspace:
           root: ~/project
           paths:
-            - packages/<< parameters.package_name >>
+            - .
 
   coverage:
     parameters:
