@@ -285,12 +285,12 @@ workflows:
       - lint:
           name: messenger-client-cli-lint
           package_name: messenger-client-cli
-          flag: messengercliclient
           requires:
             - messenger-client-cli-checkout
       - test:
           name: messenger-client-cli-test
           package_name: messenger-client-cli
+          flag: messengercliclient
           requires:
             - messenger-client-cli-checkout
       - build:
