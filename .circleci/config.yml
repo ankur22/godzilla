@@ -46,6 +46,10 @@ jobs:
     steps:
       - checkout:
           path: ~/project
+      - run:
+          name: "Create a temp directory for artifacts"
+          command: |
+            mkdir -p /tmp/artifacts
       # This step is added only to show that we are in the package directory
       - persist_to_workspace:
           root: ~/project
@@ -114,10 +118,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - run:
-          name: "Create a temp directory for artifacts"
-          command: |
-            mkdir -p /tmp/artifacts
       - run:
           name: Build
           command: echo "Build << parameters.package_name >> ..." && CGO_ENABLED=0 go build -o ./app << parameters.main_path >>
