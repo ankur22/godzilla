@@ -75,7 +75,7 @@ jobs:
       - run:
           command: |
             echo "Move codecov file for upload to codecov"
-            cp ../../.codecov.yml .
+            cp ../.codecov.yml .
       - codecov/upload:
           file: c.out
           flags: << parameters.flag >>
