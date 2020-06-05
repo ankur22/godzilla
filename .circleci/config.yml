@@ -49,7 +49,6 @@ jobs:
       - run:
           name: "Create a temp directory for artifacts"
           command: |
-            ls
             mkdir -p /tmp/artifacts
       # This step is added only to show that we are in the package directory
       - persist_to_workspace:
@@ -75,10 +74,6 @@ jobs:
             mv coverage.html /tmp/artifacts
       - run:
           command: |
-            ls ../
-            ls ../../
-            ls ../../../
-            pwd
             echo "Move codecov file for upload to codecov"
             cp ../../.codecov.yml .
       - codecov/upload:
