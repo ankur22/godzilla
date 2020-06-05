@@ -69,8 +69,9 @@ jobs:
           at: ~/project
       - run:
           command: |
-            go test ./... -coverprofile=c.out
-            go tool cover -html=c.out -o coverage.html
+            ls
+            go test ./... -coverprofile=<< parameters.package_name >>-c.out
+            go tool cover -html=<< parameters.package_name >>-c.out -o << parameters.package_name >>-coverage.html
             mv coverage.html /tmp/artifacts
       - run:
           command: |
