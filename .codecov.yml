@@ -4,16 +4,16 @@ coverage:
             default:
                 target: auto
                 threshold: 2%
-            messenger-client-cli:
+            messengerclientcli:
                 target: auto
                 threshold: 1%
                 flags:
-                    - messenger-client-cli
-            messenger-server:
+                    - messengerclientcli
+            messengerserver:
                 target: auto
                 threshold: 1%
                 flags:
-                    - messenger-server
+                    - messengerserver
 comment:
     layout: "reach, diff, flags, files"
     behavior: default
@@ -22,11 +22,11 @@ comment:
     require_head: yes       
     branches: null
 flags:
-    messenger-client-cli:
+    messengerclientcli:
         paths:
             - packages/messenger-client-cli/
         carryforward: false
-    messenger-server:
+    messengerserver:
         paths:
             - packages/messenger-server/
         carryforward: false

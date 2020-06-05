@@ -60,6 +60,8 @@ jobs:
     parameters:
       package_name:
         type: string
+      flag:
+        type: string
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
     steps:
@@ -70,10 +72,13 @@ jobs:
             go test ./... -coverprofile=c.out
             go tool cover -html=c.out -o coverage.html
             mv coverage.html /tmp/artifacts
+      - run:
+          command: |
+            echo "Move codecov file for upload to codecov"
+            cp ../../.codecov.yml .
       - codecov/upload:
-          conf: ../../.codecov.yml
           file: c.out
-          flags: << parameters.package_name >>
+          flags: << parameters.flag >>
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -254,6 +259,7 @@ workflows:
       - coverage:
           name: messenger-server-coverage
           package_name: messenger-server
+          flag: messengerserver
           requires:
             - messenger-server-checkout
       - test:
@@ -302,6 +308,7 @@ workflows:
       - coverage:
           name: messenger-client-cli-coverage
           package_name: messenger-cli-client
+          flag: messengercliclient
           requires:
             - messenger-client-cli-checkout
       - test:
