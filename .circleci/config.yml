@@ -60,30 +60,6 @@ jobs:
           paths:
             - packages/<< parameters.package_name >>
 
-  coverage:
-    parameters:
-      package_name:
-        type: string
-      flag:
-        type: string
-    executor: node
-    working_directory: ~/project/packages/<< parameters.package_name >>
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - run:
-          command: |
-            pwd
-            ls
-            go test ./... -coverprofile=<< parameters.package_name >>-c.out
-            go tool cover -html=<< parameters.package_name >>-c.out -o << parameters.package_name >>-coverage.html
-            mv << parameters.package_name >>-coverage.html /tmp/artifacts
-      - codecov/upload:
-          file: << parameters.package_name >>-c.out
-          flags: << parameters.flag >>
-      - store_artifacts:
-          path: /tmp/artifacts
-
   lint:
     parameters:
       package_name:
@@ -104,6 +80,8 @@ jobs:
     parameters:
       package_name:
         type: string
+      flag:
+        type: string
     executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
     steps:
@@ -112,7 +90,15 @@ jobs:
       # This step is added to show that files are available from the build job. 
       - run:
           name: Content to test
-          command: echo "Run tests << parameters.package_name >> ..." && go test -v -trimpath -race -vet all ./...
+          command: |
+            echo "Run tests << parameters.package_name >> ..." && go test -v -trimpath -race -vet all ./... -coverprofile=<< parameters.package_name >>-c.out
+            go tool cover -html=<< parameters.package_name >>-c.out -o << parameters.package_name >>-coverage.html
+            mv << parameters.package_name >>-coverage.html /tmp/artifacts
+      - codecov/upload:
+          file: << parameters.package_name >>-c.out
+          flags: << parameters.flag >>
+      - store_artifacts:
+          path: /tmp/artifacts
 
   build:
     parameters:
@@ -258,15 +244,10 @@ workflows:
           package_name: messenger-server
           requires:
             - messenger-server-checkout
-      - coverage:
-          name: messenger-server-coverage
-          package_name: messenger-server
-          flag: messengerserver
-          requires:
-            - messenger-server-checkout
       - test:
           name: messenger-server-test
           package_name: messenger-server
+          flag: messengerserver
           requires:
             - messenger-server-checkout
       - build:
@@ -304,11 +285,6 @@ workflows:
       - lint:
           name: messenger-client-cli-lint
           package_name: messenger-client-cli
-          requires:
-            - messenger-client-cli-checkout
-      - coverage:
-          name: messenger-client-cli-coverage
-          package_name: messenger-cli-client
           flag: messengercliclient
           requires:
             - messenger-client-cli-checkout
