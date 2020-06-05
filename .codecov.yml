@@ -30,6 +30,3 @@ flags:
         paths:
             - packages/messenger-server/
         carryforward: true
-fixes:
-    - "cmd/cli/*::packages/messenger-client-cli/cmd/cli/"
-    - "cmd/server/*::packages/messenger-server/cmd/server/"
