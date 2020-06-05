@@ -74,10 +74,12 @@ jobs:
             mv coverage.html /tmp/artifacts
       - run:
           command: |
-            ls
+            ls ../
+            ls ../../
+            ls ../../../
             pwd
             echo "Move codecov file for upload to codecov"
-            cp ../.codecov.yml .
+            cp ../../.codecov.yml .
       - codecov/upload:
           file: c.out
           flags: << parameters.flag >>
