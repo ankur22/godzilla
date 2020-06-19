@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/ankur22/godzilla/tree/master.svg?style=svg)](https://circleci.com/gh/ankur22/godzilla/tree/master)
 [![codecov](https://codecov.io/gh/ankur22/godzilla/branch/master/graph/badge.svg)](https://codecov.io/gh/ankur22/godzilla)
+![Lint everything](https://github.com/ankur22/godzilla/workflows/Lint%20everything/badge.svg)
 
 This is a monorepo which contains Go code for a messenger service. This repo is a playground where I will be playing around with the following:
 
