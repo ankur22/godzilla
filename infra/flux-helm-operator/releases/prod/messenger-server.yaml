@@ -1,0 +1,20 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: messenger-server-prod
+  namespace: prod
+  annotations:
+    fluxcd.io/automated: "true"
+    # filter.fluxcd.io/chart-image: semver:~1.0
+spec:
+  helmVersion: v3
+  releaseName: messenger-server-prod
+  chart:
+    git: git@github.com:ankur22/godzilla/infra/flux-helm-operator
+    path: charts/messenger-server
+    ref: master
+  values:
+    image:
+      repository: ankura22/messenger-server
+      tag: latest
