@@ -1,0 +1,12 @@
+apiVersion: v1
+version: 0.0.1
+appVersion: latest
+name: messenger-server
+engine: gotpl
+description: Messenger Server Helm chart for Kubernetes
+home: https://github.com/ankur22/godzilla/packages/messenger-server
+maintainers:
+- email: ankur22@users.noreply.github.com
+  name: ankur22
+sources:
+- https://github.com/ankur22/godzilla/packages/messenger-server

@@ -1,0 +1,28 @@
+# Default values for messenger-server.
+
+service:
+  httpPort: 80
+  enabled: true
+  externalPort: 80
+  type: ClusterIP
+
+hpa:
+  enabled: true
+
+replicaCount: 1
+
+ingress:
+  enabled: false
+  path: /*
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # cert-manager.io/issuer: "letsencrypt-prod"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+env:
+  port: 80
+
+image:
+  repository: ankura22/messenger-server
+  tag: latest
+  pullPolicy: IfNotPresent
