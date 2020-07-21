@@ -1,0 +1,24 @@
+---
+
+- name: Add FluxCD repo to Helm repos
+  command: helm repo add fluxcd https://charts.fluxcd.io
+
+- name: Create the FluxCD namespace
+  command: kubectl create ns fluxcd
+
+- name: Specify FluxCD infra repo
+  command: helm upgrade -i flux fluxcd/flux --wait --namespace fluxcd --set git.url=git@github.com:ankur22/godzilla/tree/master/infra/flux-helm-operator
+
+- name: Install the HelmRelease
+  command: kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/crds.yaml
+
+- name: Install Flux Helm Operator with Helm v3 support
+  command: helm upgrade -i helm-operator fluxcd/helm-operator --wait --namespace fluxcd --set git.ssh.secretName=flux-git-deploy --set helm.versions=v3
+
+- name: Get public key to write to github
+  command: fluxctl identity --k8s-fwd-ns fluxcd
+  register: pub-key
+
+- name: Create a deploy key with write access on your github with the following public key
+  debug: msg="{{ pub-key.stdout }}"
+

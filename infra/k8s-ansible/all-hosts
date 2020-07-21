@@ -19,3 +19,13 @@ ansible_become_pass='{{ cluster_sudo_password }}'
 [both:children]
 primary
 secondary
+
+[deployer]
+ubuntu ansible_host=127.0.0.1
+
+[deployer:vars]
+ansible_user='{{ deployer_username }}'
+ansible_password='{{ deployer_password }}'
+ansible_become_pass='{{ deployer_sudo_password }}'
+
+
