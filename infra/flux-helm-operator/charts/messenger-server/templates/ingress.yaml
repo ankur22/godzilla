@@ -10,11 +10,10 @@ metadata:
     chart: {{ template "messenger-server.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-# {{- with .Values.ingress.annotations }}
-#   annotations:
-# {{ toYaml . | indent 4 }}
-# {{- end }}
-# spec:
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
 # {{- if .Values.ingress.tls }}
 #   tls:
 #   {{- range .Values.ingress.tls }}
@@ -25,22 +24,22 @@ metadata:
 #       secretName: {{ .secretName }}
 #   {{- end }}
 # {{- end }}
-#   rules:
-#   {{- range .Values.ingress.hosts }}
-#     - host: {{ . }}
-#       http:
-#         paths:
-#           - path: {{ $ingressPath }}
-#             backend:
-#               serviceName: {{ $fullName }}
-#               servicePort: http
-#   {{- end }}
-#   {{- if not .Values.ingress.hosts }}
-#     - http:
-#         paths:
-#           - path: {{ $ingressPath }}
-#             backend:
-#               serviceName: {{ $fullName }}
-#               servicePort: http
-#   {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: http
+  {{- end }}
+  {{- if not .Values.ingress.hosts }}
+    - http:
+        paths:
+          - path: {{ $ingressPath }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: http
+  {{- end }}
 {{- end }}
