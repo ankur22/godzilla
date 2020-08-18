@@ -49,7 +49,7 @@ ansible-playbook -i all-hosts poweroff.yaml --vault-password-file ansible-vault-
 
 ## Provision from deployment server
 
-This will install Helm on the deployment system and flux cd onto the k8s cluster.
+This will install Helm and Flux on the deployment system and flux cd onto the k8s cluster.
 
 ```
 ansible-playbook -i all-hosts local.yaml --vault-password-file ansible-vault-password --extra-vars '@vault.yaml'
